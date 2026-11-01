@@ -542,7 +542,10 @@ func noCursor() id {
 
 func (s *surface) SetCursor(c platform.Cursor) {
 	s.cursor = c
-	if s.inside {
+	// The tracking area is active in the active app only, so inside stays
+	// true once the app is deactivated; NSCursor's set would still change
+	// the cursor over the now active app's windows.
+	if s.inside && sendBool(theBackend.app, "isActive") {
 		s.applyCursor()
 	}
 }
